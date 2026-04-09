@@ -59,3 +59,4 @@ If the hash matches `checksums.txt`, the file is authentic for that release.
 | Codex | `%USERPROFILE%\.codex\` |
 | Windsurf | `%USERPROFILE%\.codeium\windsurf\` (skills, MCP, rules) + `%APPDATA%\Windsurf\User\` (settings) |
 | Antigravity | `%USERPROFILE%\.gemini\antigravity\` |
+| Kiro IDE | `%APPDATA%\kiro\User\` (prompts, skills, settings) + `%USERPROFILE%\.kiro\settings\mcp.json` (MCP) |

@@ -16,6 +16,7 @@
 | Codex | `codex` | Yes | Yes | Solo-agent | No | No | `~/.codex` |
 | Windsurf | `windsurf` | Yes (native) | Yes | Solo-agent | No | No | `~/.codeium/windsurf` |
 | Antigravity | `antigravity` | Yes (native) | Yes | Solo-agent + Mission Control | No | No | `~/.gemini/antigravity` |
+| Kiro IDE | `kiro-ide` | Yes | Yes | Solo-agent | No | No | `~/.kiro` |
 
 All agents receive the **full SDD orchestrator** injected into their system prompt, plus skill files written to their skills directory. The agent handles SDD automatically when the task is large enough, or when the user explicitly asks for it — no manual setup required.
 
@@ -26,7 +27,7 @@ All agents receive the **full SDD orchestrator** injected into their system prom
 | Model | How It Works | Agents |
 |-------|-------------|--------|
 | **Full (sub-agents)** | Each SDD phase runs in an isolated context window via native sub-agent delegation. The orchestrator coordinates; sub-agents execute. | Claude Code, OpenCode, Gemini CLI, Cursor, VS Code Copilot |
-| **Solo-agent** | All SDD phases run inline in the same conversation. The orchestrator IS the executor. Engram provides cross-phase persistence. | Codex, Windsurf, Antigravity |
+| **Solo-agent** | All SDD phases run inline in the same conversation. The orchestrator IS the executor. Engram provides cross-phase persistence. | Codex, Windsurf, Antigravity, Kiro IDE |
 
 ### Cursor Native Subagents
 
@@ -53,11 +54,11 @@ Antigravity is an agent-first platform with built-in sub-agents (Browser, Termin
 
 ## SDD Mode Support
 
-| Feature | Claude Code | OpenCode | Gemini CLI | Cursor | VS Code Copilot | Codex | Windsurf | Antigravity |
-|---------|:-----------:|:--------:|:----------:|:------:|:---------------:|:-----:|:--------:|:-----------:|
-| SDD orchestrator | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| Single-mode SDD | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| Multi-mode SDD | — | Yes | — | — | — | — | — | — |
+| Feature | Claude Code | OpenCode | Gemini CLI | Cursor | VS Code Copilot | Codex | Windsurf | Antigravity | Kiro IDE |
+|---------|:-----------:|:--------:|:----------:|:------:|:---------------:|:-----:|:--------:|:-----------:|:--------:|
+| SDD orchestrator | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Single-mode SDD | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Multi-mode SDD | — | Yes | — | — | — | — | — | — | — |
 
 **Multi-mode** (assigning different AI models to each SDD phase) is an **OpenCode-only** feature because it requires OpenCode's provider system to route phases to specific models. All other agents run in **single-mode** — the orchestrator manages everything using whatever model the agent is already running.
 
@@ -111,3 +112,15 @@ Antigravity is an agent-first platform with built-in sub-agents (Browser, Termin
 - System prompt appended to `~/.gemini/GEMINI.md` (shared with Gemini CLI — collision check warns if both are installed)
 - Mission Control handles built-in sub-agent delegation (Browser, Terminal) automatically
 - Settings managed via the IDE's Agent settings UI, not via `settings.json`
+
+### Kiro IDE
+- **Detection**: gentle-ai detects Kiro by resolving `kiro` from `PATH` — the binary must be available
+- System prompt written as a YAML-frontmatter `.instructions.md` file (same strategy as VS Code Copilot):
+  - macOS: `~/Library/Application Support/Kiro/User/prompts/gentle-ai.instructions.md`
+  - Windows: `%APPDATA%\kiro\User\prompts\gentle-ai.instructions.md`
+  - Linux/XDG: `$XDG_CONFIG_HOME/kiro/user/prompts/gentle-ai.instructions.md` (fallback: `~/.config/kiro/user/prompts/`)
+- Skills at the platform-specific Kiro User dir under `skills/`
+- **MCP config at a separate root** — always `~/.kiro/settings/mcp.json` (macOS/Linux) or `%USERPROFILE%\.kiro\settings\mcp.json` (Windows), regardless of GlobalConfigDir
+- Native Kiro specs workflow: `.kiro/specs/<feature>/requirements.md`, `design.md`, `tasks.md` — with approval gates before apply and archive phases
+- Manual install only — download from [kiro.dev/downloads](https://kiro.dev/downloads)
+- See [docs/kiro.md](kiro.md) for full path reference and SDD behavior details
