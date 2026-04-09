@@ -65,7 +65,7 @@ func TestAdapter_GlobalConfigDir(t *testing.T) {
 	adapter := NewAdapter()
 	homeDir := "/home/user"
 	got := adapter.GlobalConfigDir(homeDir)
-	
+
 	// Verify path ends with expected structure based on OS
 	switch runtime.GOOS {
 	case "darwin":
@@ -87,9 +87,8 @@ func TestAdapter_SystemPromptDir(t *testing.T) {
 	adapter := NewAdapter()
 	homeDir := "/home/user"
 	got := adapter.SystemPromptDir(homeDir)
-	configDir := adapter.GlobalConfigDir(homeDir)
-	expected := filepath.Join(configDir, "prompts")
-	
+	expected := filepath.Join(homeDir, ".kiro", "steering")
+
 	if got != expected {
 		t.Errorf("SystemPromptDir() = %q, want %q", got, expected)
 	}
@@ -98,8 +97,7 @@ func TestAdapter_SystemPromptDir(t *testing.T) {
 func TestAdapter_SystemPromptFile(t *testing.T) {
 	adapter := NewAdapter()
 	homeDir := "/home/user"
-	promptDir := adapter.SystemPromptDir(homeDir)
-	expected := filepath.Join(promptDir, "gentle-ai.instructions.md")
+	expected := filepath.Join(homeDir, ".kiro", "steering", "gentle-ai.md")
 
 	got := adapter.SystemPromptFile(homeDir)
 	if got != expected {
@@ -145,11 +143,11 @@ func TestAdapter_MCPConfigPath(t *testing.T) {
 
 func TestAdapter_SystemPromptStrategy(t *testing.T) {
 	adapter := NewAdapter()
-	expected := model.StrategyInstructionsFile
+	expected := model.StrategySteeringFile
 
 	got := adapter.SystemPromptStrategy()
 	if got != expected {
-		t.Errorf("SystemPromptStrategy() = %q, want %q", got, expected)
+		t.Errorf("SystemPromptStrategy() = %v, want %v", got, expected)
 	}
 }
 
@@ -230,8 +228,8 @@ func TestAdapter_SupportsFeatures(t *testing.T) {
 // mockLookPathError is a mock error for testing
 type mockLookPathError struct{}
 
-func (e *mockLookPathError) Error() string   { return "executable not found" }
-func (e *mockLookPathError) Unwrap() error   { return nil }
+func (e *mockLookPathError) Error() string { return "executable not found" }
+func (e *mockLookPathError) Unwrap() error { return nil }
 
 // contains checks if a path contains all given components as substrings
 func contains(path string, components ...string) bool {

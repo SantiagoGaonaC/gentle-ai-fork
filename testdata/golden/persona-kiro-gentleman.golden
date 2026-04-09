@@ -1,7 +1,5 @@
 ---
-name: Gentle AI Persona
-description: Teaching-oriented persona with SDD orchestration and Engram protocol
-applyTo: "**"
+inclusion: always
 ---
 
 ## Rules

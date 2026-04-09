@@ -14,7 +14,7 @@ When configured, gentle-ai installs:
 
 | Artifact | Path |
 |----------|------|
-| System instructions | `<GlobalConfigDir>/prompts/gentle-ai.instructions.md` |
+| Steering file | `~/.kiro/steering/gentle-ai.md` |
 | Skills directory | `<GlobalConfigDir>/skills/` |
 | MCP config | `~/.kiro/settings/mcp.json` *(separate root — see note below)* |
 
@@ -74,6 +74,20 @@ Kiro has a built-in spec workflow that gentle-ai leverages. For medium and large
 
 ---
 
+## Steering File Format
+
+The steering file written by gentle-ai uses the following frontmatter:
+
+```yaml
+---
+inclusion: always
+---
+```
+
+`inclusion: always` ensures Kiro loads this context in every conversation automatically, regardless of workspace or file type.
+
+---
+
 ## Config Paths by Platform
 
 ### macOS
@@ -81,7 +95,7 @@ Kiro has a built-in spec workflow that gentle-ai leverages. For medium and large
 | Artifact | Path |
 |----------|------|
 | Global config dir | `~/Library/Application Support/Kiro/User` |
-| System prompt file | `~/Library/Application Support/Kiro/User/prompts/gentle-ai.instructions.md` |
+| Steering file | `~/.kiro/steering/gentle-ai.md` |
 | Skills dir | `~/Library/Application Support/Kiro/User/skills/` |
 | Settings path | `~/Library/Application Support/Kiro/User/settings.json` |
 | MCP config | `~/.kiro/settings/mcp.json` |
@@ -91,7 +105,7 @@ Kiro has a built-in spec workflow that gentle-ai leverages. For medium and large
 | Artifact | Path |
 |----------|------|
 | Global config dir | `%APPDATA%\kiro\User` |
-| System prompt file | `%APPDATA%\kiro\User\prompts\gentle-ai.instructions.md` |
+| Steering file | `%USERPROFILE%\.kiro\steering\gentle-ai.md` |
 | Skills dir | `%APPDATA%\kiro\User\skills\` |
 | Settings path | `%APPDATA%\kiro\User\settings.json` |
 | MCP config | `%USERPROFILE%\.kiro\settings\mcp.json` |
@@ -101,7 +115,7 @@ Kiro has a built-in spec workflow that gentle-ai leverages. For medium and large
 | Artifact | Path |
 |----------|------|
 | Global config dir | `$XDG_CONFIG_HOME/kiro/user` *(fallback: `~/.config/kiro/user`)* |
-| System prompt file | `$XDG_CONFIG_HOME/kiro/user/prompts/gentle-ai.instructions.md` |
+| Steering file | `~/.kiro/steering/gentle-ai.md` |
 | Skills dir | `$XDG_CONFIG_HOME/kiro/user/skills/` |
 | Settings path | `$XDG_CONFIG_HOME/kiro/user/settings.json` |
 | MCP config | `~/.kiro/settings/mcp.json` |

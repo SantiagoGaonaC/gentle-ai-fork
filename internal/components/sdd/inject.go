@@ -203,7 +203,7 @@ func Inject(homeDir string, adapter agents.Adapter, sddMode model.SDDModeID, opt
 			changed = changed || result.Changed
 			files = append(files, result.Files...)
 
-		case model.StrategyFileReplace, model.StrategyAppendToFile, model.StrategyInstructionsFile:
+		case model.StrategyFileReplace, model.StrategyAppendToFile, model.StrategyInstructionsFile, model.StrategySteeringFile:
 			// For FileReplace/AppendToFile agents, the SDD orchestrator is included
 			// in the generic persona asset. However, if the user chose neutral or
 			// custom persona, the SDD content must still be injected. We append the
@@ -889,6 +889,10 @@ func injectFileAppend(homeDir string, adapter agents.Adapter) (InjectionResult, 
 		existing = instructionsFrontmatter
 	}
 
+	if adapter.SystemPromptStrategy() == model.StrategySteeringFile && strings.TrimSpace(existing) == "" {
+		existing = steeringFrontmatter
+	}
+
 	// Use agent-specific SDD orchestrator content when available; fall back to generic.
 	content := assets.MustRead(sddOrchestratorAsset(adapter.Agent()))
 
@@ -1012,6 +1016,10 @@ const instructionsFrontmatter = "---\n" +
 	"name: Gentle AI Persona\n" +
 	"description: Gentleman persona with SDD orchestration and Engram protocol\n" +
 	"applyTo: \"**\"\n" +
+	"---\n"
+
+const steeringFrontmatter = "---\n" +
+	"inclusion: always\n" +
 	"---\n"
 
 // stripBareOrchestratorSection removes an un-marked "## Agent Teams Orchestrator"

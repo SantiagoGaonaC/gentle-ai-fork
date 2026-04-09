@@ -177,6 +177,31 @@ func Inject(homeDir string, adapter agents.Adapter, persona model.PersonaID) (In
 		changed = changed || writeResult.Changed
 		files = append(files, promptPath)
 
+	case model.StrategySteeringFile:
+		promptPath := adapter.SystemPromptFile(homeDir)
+
+		existing, readErr := readFileOrEmpty(promptPath)
+		if readErr != nil {
+			return InjectionResult{}, readErr
+		}
+
+		var steeringContent string
+		if preserved, ok := preserveManagedSections(existing, wrapSteeringFile(content), persona); ok {
+			steeringContent = preserved
+		} else {
+			steeringContent = wrapSteeringFile(content)
+		}
+
+		if err := os.MkdirAll(filepath.Dir(promptPath), 0o755); err != nil {
+			return InjectionResult{}, err
+		}
+		writeResult, err := filemerge.WriteFileAtomic(promptPath, []byte(steeringContent), 0o644)
+		if err != nil {
+			return InjectionResult{}, err
+		}
+		changed = changed || writeResult.Changed
+		files = append(files, promptPath)
+
 	case model.StrategyAppendToFile:
 		promptPath := adapter.SystemPromptFile(homeDir)
 
@@ -379,6 +404,14 @@ func wrapInstructionsFile(content string) string {
 		"name: Gentle AI Persona\n" +
 		"description: Teaching-oriented persona with SDD orchestration and Engram protocol\n" +
 		"applyTo: \"**\"\n" +
+		"---\n\n"
+
+	return frontmatter + content
+}
+
+func wrapSteeringFile(content string) string {
+	frontmatter := "---\n" +
+		"inclusion: always\n" +
 		"---\n\n"
 
 	return frontmatter + content

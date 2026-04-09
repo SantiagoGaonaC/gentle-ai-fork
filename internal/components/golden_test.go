@@ -357,8 +357,8 @@ func TestGoldenSDD_Kiro(t *testing.T) {
 		t.Fatalf("sdd.Inject(kiro) changed = false")
 	}
 
-	// Kiro writes SDD orchestrator to <configDir>/prompts/gentle-ai.instructions.md
-	// (StrategyInstructionsFile). Use the adapter to resolve the platform-specific path.
+	// Kiro writes SDD orchestrator to ~/.kiro/steering/gentle-ai.md
+	// (StrategySteeringFile). Use the adapter to resolve the platform-specific path.
 	promptPath := adapter.SystemPromptFile(home)
 	instructionsFile := readTestFile(t, promptPath)
 	assertGolden(t, "sdd-kiro-instructions.golden", instructionsFile)

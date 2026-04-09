@@ -115,10 +115,7 @@ Antigravity is an agent-first platform with built-in sub-agents (Browser, Termin
 
 ### Kiro IDE
 - **Detection**: gentle-ai detects Kiro by resolving `kiro` from `PATH` — the binary must be available
-- System prompt written as a YAML-frontmatter `.instructions.md` file (same strategy as VS Code Copilot):
-  - macOS: `~/Library/Application Support/Kiro/User/prompts/gentle-ai.instructions.md`
-  - Windows: `%APPDATA%\kiro\User\prompts\gentle-ai.instructions.md`
-  - Linux/XDG: `$XDG_CONFIG_HOME/kiro/user/prompts/gentle-ai.instructions.md` (fallback: `~/.config/kiro/user/prompts/`)
+- **Steering file** (all platforms): `~/.kiro/steering/gentle-ai.md` with frontmatter `inclusion: always`
 - Skills at the platform-specific Kiro User dir under `skills/`
 - **MCP config at a separate root** — always `~/.kiro/settings/mcp.json` (macOS/Linux) or `%USERPROFILE%\.kiro\settings\mcp.json` (Windows), regardless of GlobalConfigDir
 - Native Kiro specs workflow: `.kiro/specs/<feature>/requirements.md`, `design.md`, `tasks.md` — with approval gates before apply and archive phases

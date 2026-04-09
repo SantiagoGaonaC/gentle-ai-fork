@@ -67,11 +67,11 @@ func (a *Adapter) GlobalConfigDir(homeDir string) string {
 }
 
 func (a *Adapter) SystemPromptDir(homeDir string) string {
-	return filepath.Join(a.kiroConfigDir(homeDir), "prompts")
+	return filepath.Join(homeDir, ".kiro", "steering")
 }
 
 func (a *Adapter) SystemPromptFile(homeDir string) string {
-	return filepath.Join(a.SystemPromptDir(homeDir), "gentle-ai.instructions.md")
+	return filepath.Join(a.SystemPromptDir(homeDir), "gentle-ai.md")
 }
 
 func (a *Adapter) SkillsDir(homeDir string) string {
@@ -86,7 +86,7 @@ func (a *Adapter) SettingsPath(homeDir string) string {
 // --- Config strategies ---
 
 func (a *Adapter) SystemPromptStrategy() model.SystemPromptStrategy {
-	return model.StrategyInstructionsFile
+	return model.StrategySteeringFile
 }
 
 func (a *Adapter) MCPStrategy() model.MCPStrategy {
