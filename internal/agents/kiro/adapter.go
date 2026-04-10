@@ -75,8 +75,13 @@ func (a *Adapter) SystemPromptFile(homeDir string) string {
 }
 
 func (a *Adapter) SkillsDir(homeDir string) string {
-	// Skills stored in ~/.config/kiro/user/skills (or equivalent per OS)
-	return filepath.Join(a.GlobalConfigDir(homeDir), "skills")
+	// Skills are always stored in ~/.kiro/skills/ on all platforms.
+	// This is intentionally independent from GlobalConfigDir() — Kiro uses a split-root
+	// layout where settings live in the OS app-config dir (e.g. %APPDATA%\kiro\User on
+	// Windows) but the IDE reads skills, steering, agents, and MCP from the home-based
+	// ~/.kiro/ root. Using GlobalConfigDir() here would make skills invisible in the IDE
+	// on Windows.
+	return filepath.Join(homeDir, ".kiro", "skills")
 }
 
 func (a *Adapter) SettingsPath(homeDir string) string {

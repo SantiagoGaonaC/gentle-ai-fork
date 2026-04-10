@@ -108,12 +108,17 @@ func TestAdapter_SystemPromptFile(t *testing.T) {
 func TestAdapter_SkillsDir(t *testing.T) {
 	adapter := NewAdapter()
 	homeDir := "/home/user"
-	configDir := adapter.GlobalConfigDir(homeDir)
-	expected := filepath.Join(configDir, "skills")
+	expected := filepath.Join(homeDir, ".kiro", "skills")
 
 	got := adapter.SkillsDir(homeDir)
 	if got != expected {
 		t.Errorf("SkillsDir() = %q, want %q", got, expected)
+	}
+
+	// Verify path is independent from GlobalConfigDir (must not contain AppData or platform config dir).
+	globalConfigDir := adapter.GlobalConfigDir(homeDir)
+	if got == filepath.Join(globalConfigDir, "skills") {
+		t.Errorf("SkillsDir() must be independent from GlobalConfigDir(); got %q which matches GlobalConfigDir/skills", got)
 	}
 }
 

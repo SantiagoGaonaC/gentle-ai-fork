@@ -109,7 +109,7 @@ The `model` value is injected during sync from Claude alias assignments (`opus|s
 |----------|------|
 | Global config dir | `~/Library/Application Support/Kiro/User` |
 | Steering file | `~/.kiro/steering/gentle-ai.md` |
-| Skills dir | `~/Library/Application Support/Kiro/User/skills/` |
+| Skills dir | `~/.kiro/skills/` |
 | Settings path | `~/Library/Application Support/Kiro/User/settings.json` |
 | MCP config | `~/.kiro/settings/mcp.json` |
 
@@ -119,7 +119,7 @@ The `model` value is injected during sync from Claude alias assignments (`opus|s
 |----------|------|
 | Global config dir | `%APPDATA%\kiro\User` |
 | Steering file | `%USERPROFILE%\.kiro\steering\gentle-ai.md` |
-| Skills dir | `%APPDATA%\kiro\User\skills\` |
+| Skills dir | `%USERPROFILE%\.kiro\skills\` |
 | Settings path | `%APPDATA%\kiro\User\settings.json` |
 | MCP config | `%USERPROFILE%\.kiro\settings\mcp.json` |
 
@@ -129,7 +129,7 @@ The `model` value is injected during sync from Claude alias assignments (`opus|s
 |----------|------|
 | Global config dir | `$XDG_CONFIG_HOME/kiro/user` *(fallback: `~/.config/kiro/user`)* |
 | Steering file | `~/.kiro/steering/gentle-ai.md` |
-| Skills dir | `$XDG_CONFIG_HOME/kiro/user/skills/` |
+| Skills dir | `~/.kiro/skills/` |
 | Settings path | `$XDG_CONFIG_HOME/kiro/user/settings.json` |
 | MCP config | `~/.kiro/settings/mcp.json` |
 
