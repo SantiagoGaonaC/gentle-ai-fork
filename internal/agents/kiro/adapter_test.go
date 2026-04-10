@@ -185,10 +185,10 @@ func TestAdapter_KiroModelID(t *testing.T) {
 		alias model.ClaudeModelAlias
 		want  string
 	}{
-		{model.ClaudeModelOpus, "claude-opus-4-6"},
-		{model.ClaudeModelSonnet, "claude-sonnet-4-6"},
-		{model.ClaudeModelHaiku, "claude-haiku-4-5"},
-		{"unknown", "claude-sonnet-4-6"},
+		{model.ClaudeModelOpus, "claude-opus-4.6"},
+		{model.ClaudeModelSonnet, "claude-sonnet-4.6"},
+		{model.ClaudeModelHaiku, "claude-haiku-4.5"},
+		{"unknown", "claude-sonnet-4.6"},
 	}
 	for _, tt := range tests {
 		if got := adapter.KiroModelID(tt.alias); got != tt.want {

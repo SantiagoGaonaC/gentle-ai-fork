@@ -10,10 +10,10 @@ package model
 func KiroModelID(alias ClaudeModelAlias) string {
 	switch alias {
 	case ClaudeModelOpus:
-		return "claude-opus-4-6"
+		return "claude-opus-4.6"
 	case ClaudeModelHaiku:
-		return "claude-haiku-4-5"
+		return "claude-haiku-4.5"
 	default:
-		return "claude-sonnet-4-6"
+		return "claude-sonnet-4.6"
 	}
 }

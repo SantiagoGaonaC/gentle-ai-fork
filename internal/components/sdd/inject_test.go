@@ -3009,10 +3009,10 @@ func TestInjectKiroAppliesCustomPhaseModelAssignments(t *testing.T) {
 		phase string
 		want  string
 	}{
-		{phase: "sdd-design", want: "model: claude-opus-4-6"},
-		{phase: "sdd-archive", want: "model: claude-haiku-4-5"},
+		{phase: "sdd-design", want: "model: claude-opus-4.6"},
+		{phase: "sdd-archive", want: "model: claude-haiku-4.5"},
 		// Unspecified phase should use default sonnet.
-		{phase: "sdd-spec", want: "model: claude-sonnet-4-6"},
+		{phase: "sdd-spec", want: "model: claude-sonnet-4.6"},
 	}
 
 	for _, tt := range tests {
