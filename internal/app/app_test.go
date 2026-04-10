@@ -332,6 +332,28 @@ func TestTuiSyncStrictTDDNilOverrideNoChange(t *testing.T) {
 
 func boolPtr(b bool) *bool { return &b }
 
+// TestApplyOverrides_KiroModelAssignments verifies that a non-nil KiroModelAssignments
+// override replaces the entire KiroModelAssignments map in the selection (same
+// replacement semantics as ClaudeModelAssignments — not a key-level merge).
+func TestApplyOverrides_KiroModelAssignments(t *testing.T) {
+	selection := model.Selection{
+		KiroModelAssignments: map[string]model.ClaudeModelAlias{"sdd-apply": model.ClaudeModelSonnet},
+	}
+	overrides := &model.SyncOverrides{
+		KiroModelAssignments: map[string]model.ClaudeModelAlias{"sdd-design": model.ClaudeModelOpus},
+	}
+
+	applyOverrides(&selection, overrides)
+
+	// The whole map is replaced — prior entries (sdd-apply) are gone.
+	if got := selection.KiroModelAssignments["sdd-design"]; got != model.ClaudeModelOpus {
+		t.Fatalf("KiroModelAssignments[sdd-design] = %q, want %q", got, model.ClaudeModelOpus)
+	}
+	if _, exists := selection.KiroModelAssignments["sdd-apply"]; exists {
+		t.Fatal("KiroModelAssignments[sdd-apply] should not exist after full-map replacement")
+	}
+}
+
 // ─── Persist model assignments (TUI path) ───────────────────────────────────
 
 // TestLoadPersistedAssignmentsPopulatesEmptySelection verifies that when

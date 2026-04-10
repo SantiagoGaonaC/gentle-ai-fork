@@ -8,20 +8,20 @@ import (
 // ─── ModelConfigOptions ────────────────────────────────────────────────────
 
 // TestModelConfigOptions_Count verifies that ModelConfigOptions returns exactly
-// 3 items: Claude, OpenCode, and Back.
+// 4 items: Claude, Kiro, OpenCode, and Back.
 func TestModelConfigOptions_Count(t *testing.T) {
 	opts := ModelConfigOptions()
-	if len(opts) != 3 {
-		t.Fatalf("ModelConfigOptions() len = %d, want 3; got %v", len(opts), opts)
+	if len(opts) != 4 {
+		t.Fatalf("ModelConfigOptions() len = %d, want 4; got %v", len(opts), opts)
 	}
 }
 
 // TestModelConfigOptions_ContainsRequiredItems verifies the three options are
-// Claude, OpenCode, and Back (in order).
+// Claude, Kiro, OpenCode, and Back (in order).
 func TestModelConfigOptions_ContainsRequiredItems(t *testing.T) {
 	opts := ModelConfigOptions()
 
-	want := []string{"Claude", "OpenCode", "Back"}
+	want := []string{"Claude", "Kiro", "OpenCode", "Back"}
 	for _, w := range want {
 		found := false
 		for _, opt := range opts {
@@ -48,7 +48,7 @@ func TestModelConfigOptions_BackIsLast(t *testing.T) {
 // ─── RenderModelConfig ─────────────────────────────────────────────────────
 
 // TestRenderModelConfig_RendersAllOptions verifies that the model config screen
-// renders all three options.
+// renders all options.
 func TestRenderModelConfig_RendersAllOptions(t *testing.T) {
 	out := RenderModelConfig(0)
 

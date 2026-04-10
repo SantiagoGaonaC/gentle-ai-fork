@@ -23,6 +23,7 @@ type InjectionResult struct {
 type InjectOptions struct {
 	OpenCodeModelAssignments map[string]model.ModelAssignment
 	ClaudeModelAssignments   map[string]model.ClaudeModelAlias
+	KiroModelAssignments     map[string]model.ClaudeModelAlias
 
 	// WorkspaceDir is the root of the current workspace (e.g. os.Getwd()).
 	// When non-empty and the adapter implements workflowInjector, native
@@ -517,9 +518,18 @@ func Inject(homeDir string, adapter agents.Adapter, sddMode model.SDDModeID, opt
 			if kmr, ok := adapter.(kiroModelResolver); ok {
 				phase := strings.TrimSuffix(entry.Name(), ".md")
 				alias := model.ClaudeModelSonnet // safe default
-				if opts.ClaudeModelAssignments != nil {
+				if opts.KiroModelAssignments != nil {
+					if a, hasAlias := opts.KiroModelAssignments[phase]; hasAlias {
+						alias = a
+					} else if d, hasDefault := opts.KiroModelAssignments["default"]; hasDefault {
+						alias = d
+					}
+				} else if opts.ClaudeModelAssignments != nil {
+					// Backward-compatible fallback when Kiro-specific assignments are not provided.
 					if a, hasAlias := opts.ClaudeModelAssignments[phase]; hasAlias {
 						alias = a
+					} else if d, hasDefault := opts.ClaudeModelAssignments["default"]; hasDefault {
+						alias = d
 					}
 				}
 				contentStr = strings.ReplaceAll(contentStr, "{{KIRO_MODEL}}", kmr.KiroModelID(alias))

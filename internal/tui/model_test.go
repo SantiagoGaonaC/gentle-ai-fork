@@ -874,9 +874,9 @@ func TestModelConfig_ClaudePickerNavigation(t *testing.T) {
 	}
 }
 
-// TestModelConfig_OpenCodePickerNavigation verifies that selecting cursor 1
-// from ScreenModelConfig transitions to ScreenModelPicker with ModelConfigMode set.
-func TestModelConfig_OpenCodePickerNavigation(t *testing.T) {
+// TestModelConfig_KiroPickerNavigation verifies that selecting cursor 1
+// from ScreenModelConfig transitions to ScreenKiroModelPicker with ModelConfigMode set.
+func TestModelConfig_KiroPickerNavigation(t *testing.T) {
 	m := NewModel(system.DetectionResult{}, "dev")
 	m.Screen = ScreenModelConfig
 	m.Cursor = 1
@@ -884,17 +884,17 @@ func TestModelConfig_OpenCodePickerNavigation(t *testing.T) {
 	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	state := updated.(Model)
 
-	if state.Screen != ScreenModelPicker {
-		t.Fatalf("ModelConfig cursor=1 (OpenCode): screen = %v, want %v", state.Screen, ScreenModelPicker)
+	if state.Screen != ScreenKiroModelPicker {
+		t.Fatalf("ModelConfig cursor=1 (Kiro): screen = %v, want %v", state.Screen, ScreenKiroModelPicker)
 	}
 	if !state.ModelConfigMode {
-		t.Fatalf("ModelConfigMode should be true after entering OpenCode picker from ModelConfig")
+		t.Fatalf("ModelConfigMode should be true after entering Kiro picker from ModelConfig")
 	}
 }
 
-// TestModelConfig_BackNavigation verifies that selecting cursor 2 (Back) from
-// ScreenModelConfig returns to ScreenWelcome.
-func TestModelConfig_BackNavigation(t *testing.T) {
+// TestModelConfig_OpenCodePickerNavigation verifies that selecting cursor 2
+// from ScreenModelConfig transitions to ScreenModelPicker with ModelConfigMode set.
+func TestModelConfig_OpenCodePickerNavigation(t *testing.T) {
 	m := NewModel(system.DetectionResult{}, "dev")
 	m.Screen = ScreenModelConfig
 	m.Cursor = 2
@@ -902,8 +902,26 @@ func TestModelConfig_BackNavigation(t *testing.T) {
 	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	state := updated.(Model)
 
+	if state.Screen != ScreenModelPicker {
+		t.Fatalf("ModelConfig cursor=2 (OpenCode): screen = %v, want %v", state.Screen, ScreenModelPicker)
+	}
+	if !state.ModelConfigMode {
+		t.Fatalf("ModelConfigMode should be true after entering OpenCode picker from ModelConfig")
+	}
+}
+
+// TestModelConfig_BackNavigation verifies that selecting cursor 3 (Back) from
+// ScreenModelConfig returns to ScreenWelcome.
+func TestModelConfig_BackNavigation(t *testing.T) {
+	m := NewModel(system.DetectionResult{}, "dev")
+	m.Screen = ScreenModelConfig
+	m.Cursor = 3
+
+	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	state := updated.(Model)
+
 	if state.Screen != ScreenWelcome {
-		t.Fatalf("ModelConfig cursor=2 (Back): screen = %v, want %v", state.Screen, ScreenWelcome)
+		t.Fatalf("ModelConfig cursor=3 (Back): screen = %v, want %v", state.Screen, ScreenWelcome)
 	}
 }
 
@@ -935,6 +953,22 @@ func TestModelConfig_ClaudePickerBackReturnsToModelConfig(t *testing.T) {
 
 	if state.Screen != ScreenModelConfig {
 		t.Fatalf("ClaudeModelPicker esc (ModelConfigMode): screen = %v, want %v", state.Screen, ScreenModelConfig)
+	}
+}
+
+// TestModelConfig_KiroPickerBackReturnsToModelConfig verifies that pressing
+// Esc from ScreenKiroModelPicker when in ModelConfigMode returns to ScreenModelConfig.
+func TestModelConfig_KiroPickerBackReturnsToModelConfig(t *testing.T) {
+	m := NewModel(system.DetectionResult{}, "dev")
+	m.Screen = ScreenKiroModelPicker
+	m.ModelConfigMode = true
+	m.KiroModelPicker = screens.NewKiroModelPickerState()
+
+	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	state := updated.(Model)
+
+	if state.Screen != ScreenModelConfig {
+		t.Fatalf("KiroModelPicker esc (ModelConfigMode): screen = %v, want %v", state.Screen, ScreenModelConfig)
 	}
 }
 
@@ -2487,7 +2521,7 @@ func TestModelConfigOpenCodePrePopulatesAssignments(t *testing.T) {
 
 	m := NewModel(system.DetectionResult{}, "dev")
 	m.Screen = ScreenModelConfig
-	m.Cursor = 1 // Configure OpenCode models
+	m.Cursor = 2 // Configure OpenCode models
 
 	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	state := updated.(Model)
@@ -2533,7 +2567,7 @@ func TestModelConfigOpenCodeDoesNotOverwriteExistingSessionAssignments(t *testin
 
 	m := NewModel(system.DetectionResult{}, "dev")
 	m.Screen = ScreenModelConfig
-	m.Cursor = 1
+	m.Cursor = 2
 	// Pre-populate Selection.ModelAssignments in the current session
 	m.Selection.ModelAssignments = map[string]model.ModelAssignment{
 		"sdd-orchestrator": sessionAssignment,
@@ -2564,7 +2598,7 @@ func TestModelConfigOpenCodeNoPrePopulationWhenFileEmpty(t *testing.T) {
 
 	m := NewModel(system.DetectionResult{}, "dev")
 	m.Screen = ScreenModelConfig
-	m.Cursor = 1
+	m.Cursor = 2
 
 	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	state := updated.(Model)
