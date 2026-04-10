@@ -1129,11 +1129,7 @@ func (m Model) confirmSelection() (tea.Model, tea.Cmd) {
 			m.ModelConfigMode = true
 			m.ClaudeModelPicker = screens.NewClaudeModelPickerState()
 			m.setScreen(ScreenClaudeModelPicker)
-		case 1: // Configure Kiro models
-			m.ModelConfigMode = true
-			m.KiroModelPicker = screens.NewKiroModelPickerState()
-			m.setScreen(ScreenKiroModelPicker)
-		case 2: // Configure OpenCode models
+		case 1: // Configure OpenCode models
 			m.ModelConfigMode = true
 			cachePath := opencode.DefaultCachePath()
 			if _, err := osStatModelCache(cachePath); err == nil {
@@ -1151,6 +1147,10 @@ func (m Model) confirmSelection() (tea.Model, tea.Cmd) {
 				}
 			}
 			m.setScreen(ScreenModelPicker)
+		case 2: // Configure Kiro models
+			m.ModelConfigMode = true
+			m.KiroModelPicker = screens.NewKiroModelPickerState()
+			m.setScreen(ScreenKiroModelPicker)
 		default: // Back
 			m.setScreen(ScreenWelcome)
 		}

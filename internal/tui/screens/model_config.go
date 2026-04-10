@@ -10,8 +10,8 @@ import (
 func ModelConfigOptions() []string {
 	return []string{
 		"Configure Claude models",
-		"Configure Kiro models",
 		"Configure OpenCode models",
+		"Configure Kiro models",
 		"Back",
 	}
 }
