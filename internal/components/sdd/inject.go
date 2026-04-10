@@ -72,6 +72,14 @@ type subAgentInjector interface {
 	EmbeddedSubAgentsDir() string
 }
 
+// kiroModelResolver is an optional adapter capability. When implemented,
+// the subagent copy loop resolves ClaudeModelAlias values to native model IDs
+// and stamps them into the agent frontmatter sentinel {{KIRO_MODEL}}.
+// Adapters that do not implement this interface are unaffected.
+type kiroModelResolver interface {
+	KiroModelID(alias model.ClaudeModelAlias) string
+}
+
 // monorepoRootMarkers identify files/dirs that ONLY exist at the true root
 // of a multi-package workspace. If any of these is found while walking up,
 // we stop immediately — this is the authoritative project root.
@@ -502,9 +510,23 @@ func Inject(homeDir string, adapter agents.Adapter, sddMode model.SDDModeID, opt
 			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 				continue
 			}
-			content := assets.MustRead(embeddedDir + "/" + entry.Name())
+			contentStr := string(assets.MustRead(embeddedDir + "/" + entry.Name()))
+
+			// Resolve {{KIRO_MODEL}} placeholder for adapters that support it (e.g. Kiro).
+			// Non-Kiro adapters (Cursor, etc.) don't implement kiroModelResolver and are unaffected.
+			if kmr, ok := adapter.(kiroModelResolver); ok {
+				phase := strings.TrimSuffix(entry.Name(), ".md")
+				alias := model.ClaudeModelSonnet // safe default
+				if opts.ClaudeModelAssignments != nil {
+					if a, hasAlias := opts.ClaudeModelAssignments[phase]; hasAlias {
+						alias = a
+					}
+				}
+				contentStr = strings.ReplaceAll(contentStr, "{{KIRO_MODEL}}", kmr.KiroModelID(alias))
+			}
+
 			outPath := filepath.Join(agentsDir, entry.Name())
-			writeResult, err := filemerge.WriteFileAtomic(outPath, []byte(content), 0o644)
+			writeResult, err := filemerge.WriteFileAtomic(outPath, []byte(contentStr), 0o644)
 			if err != nil {
 				return InjectionResult{}, fmt.Errorf("write agent %s: %w", entry.Name(), err)
 			}

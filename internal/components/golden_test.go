@@ -379,6 +379,18 @@ func TestGoldenSDD_Kiro(t *testing.T) {
 			t.Errorf("expected SDD skill file %q not found: %v", name, err)
 		}
 	}
+
+	// Verify all 10 Kiro native SDD phase agent files with golden snapshots.
+	// SubAgentsDir is not part of the agents.Adapter interface — use the concrete adapter.
+	agentsDir := filepath.Join(home, ".kiro", "agents")
+	for _, name := range []string{
+		"sdd-init", "sdd-explore", "sdd-propose", "sdd-spec",
+		"sdd-design", "sdd-tasks", "sdd-apply", "sdd-verify",
+		"sdd-archive", "sdd-onboard",
+	} {
+		agentContent := readTestFile(t, filepath.Join(agentsDir, name+".md"))
+		assertGolden(t, "sdd-kiro-agent-"+name+".golden", agentContent)
+	}
 }
 
 // ---------------------------------------------------------------------------

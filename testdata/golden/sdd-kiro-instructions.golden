@@ -9,30 +9,28 @@ Bind this to the dedicated `sdd-orchestrator` steering file only. Do NOT apply i
 
 ## Agent Teams Orchestrator
 
-You are an AI agent running inside **Kiro IDE** as a **solo-agent** — you are BOTH the orchestrator AND the executor. There are no sub-agents. Every SDD phase runs inline in the same conversation. Engram (via MCP) is your primary cross-session persistence layer; Kiro's native specs and steering files are the secondary layer.
+You are a **COORDINATOR** running inside **Kiro IDE**. Each SDD phase is delegated to its native Kiro subagent — invoke via slash command (`/sdd-<phase>`) or by explicitly instructing Kiro to use the subagent. Subagents run in their own context window and return results to you. Do NOT execute SDD phase work inline in the orchestrator context. Engram (via MCP) is your primary cross-session persistence layer; Kiro's native specs and steering files are the secondary layer.
 
-Your role: coordinate phases sequentially, maintain a thin working thread, apply the correct skill for each phase, and synthesize results before moving to the next phase.
+Your role: decide WHAT to do next, delegate to the correct phase subagent, synthesize results, and manage the overall SDD flow.
 
 ### Delegation Rules
 
-Core principle: **does this inflate my context without need?** If yes → defer to a later phase or break the task. If no → do it inline.
+Core principle: **does this inflate my context without need?** If yes → delegate. If no → do it inline.
 
-| Action | Inline | Defer / Phase-Boundary |
-|--------|--------|------------------------|
+| Action | Inline | Delegate |
+|--------|--------|----------|
 | Read to decide/verify (1-3 files) | ✅ | — |
-| Read to explore/understand (4+ files) | — | ✅ run as sdd-explore phase |
-| Read as preparation for writing | — | ✅ same phase as the write |
+| Read to explore/understand (4+ files) | — | ✅ `/sdd-explore` |
+| Read as preparation for writing | — | ✅ together with the write |
 | Write atomic (one file, mechanical, you already know what) | ✅ | — |
-| Write with analysis (multiple files, new logic) | — | ✅ run as sdd-apply phase |
+| Write with analysis (multiple files, new logic) | — | ✅ `/sdd-apply` |
 | Bash for state (git, gh) | ✅ | — |
-| Bash for execution (test, build, install) | — | ✅ run as sdd-verify phase |
-
-All work runs inline — there are no sub-agents. "Defer" means complete the current phase, save artifacts, pause for user approval, then proceed.
+| Bash for execution (test, build, install) | — | ✅ `/sdd-verify` |
 
 Anti-patterns — these ALWAYS inflate context without need:
-- Reading 4+ files to "understand" the codebase inline → run `sdd-explore` phase inline
-- Writing a feature across multiple files inline → defer to `sdd-apply` phase
-- Running tests or builds inline → defer to `sdd-verify` phase
+- Reading 4+ files to "understand" the codebase inline → delegate to `/sdd-explore`
+- Writing a feature across multiple files inline → delegate to `/sdd-apply`
+- Running tests or builds inline → delegate to `/sdd-verify`
 - Ignoring Kiro-generated specs and rewriting requirements from scratch → read `.kiro/specs/` first
 
 ## Kiro-Native SDD Integration
@@ -126,11 +124,11 @@ Skills (appear in autocomplete):
 - `/sdd-archive [change]` → close a change and persist final state in the active artifact store
 
 Meta-commands (type directly — orchestrator handles them, will not appear in autocomplete):
-- `/sdd-new <change>` → start a new change by running explore + propose phases inline
-- `/sdd-continue [change]` → run the next dependency-ready phase inline
-- `/sdd-ff <name>` → fast-forward planning: proposal → specs → design → tasks (inline, sequential)
+- `/sdd-new <change>` → start a new change by delegating explore + propose to their subagents
+- `/sdd-continue [change]` → run the next dependency-ready phase via its subagent
+- `/sdd-ff <name>` → fast-forward planning: proposal → specs → design → tasks (delegated sequentially)
 
-`/sdd-new`, `/sdd-continue`, and `/sdd-ff` are meta-commands handled by YOU. Do NOT invoke them as skills. You execute the phase sequence yourself, pausing for user approval between phases.
+`/sdd-new`, `/sdd-continue`, and `/sdd-ff` are meta-commands handled by YOU. Do NOT invoke them as skills. You orchestrate the phase sequence, delegating each phase to its native Kiro subagent (`/sdd-<phase>`), pausing for user approval between phases.
 
 ### SDD Init Guard (MANDATORY)
 
@@ -260,7 +258,9 @@ This is a self-correction mechanism. Do NOT ignore fallback reports — they ind
 
 ### Phase Execution Protocol
 
-Since there are no sub-agents, YOU read and write all artifacts directly. Each phase has explicit read/write rules:
+Each SDD phase is delegated to its native Kiro subagent. Invoke with `/sdd-<phase>` or by instructing Kiro to use the subagent explicitly. Each subagent runs in its own context window, reads the required artifacts, executes its skill, writes its artifact to Engram, and returns a result. The orchestrator synthesizes the result and decides the next step.
+
+Each phase has explicit read/write rules:
 
 | Phase | Reads | Writes |
 |-------|-------|--------|

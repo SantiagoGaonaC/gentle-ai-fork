@@ -83,6 +83,26 @@ func (a *Adapter) SettingsPath(homeDir string) string {
 	return filepath.Join(a.kiroConfigDir(homeDir), "settings.json")
 }
 
+// --- Sub-agent support (Kiro native agents in ~/.kiro/agents/) ---
+
+func (a *Adapter) SupportsSubAgents() bool {
+	return true
+}
+
+func (a *Adapter) SubAgentsDir(homeDir string) string {
+	return filepath.Join(homeDir, ".kiro", "agents")
+}
+
+func (a *Adapter) EmbeddedSubAgentsDir() string {
+	return "kiro/agents"
+}
+
+// KiroModelID resolves a ClaudeModelAlias to a Kiro-native model identifier.
+// Used by the SDD injector to stamp the `model:` field in agent frontmatter.
+func (a *Adapter) KiroModelID(alias model.ClaudeModelAlias) string {
+	return model.KiroModelID(alias)
+}
+
 // --- Config strategies ---
 
 func (a *Adapter) SystemPromptStrategy() model.SystemPromptStrategy {

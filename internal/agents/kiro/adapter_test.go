@@ -151,6 +151,47 @@ func TestAdapter_SystemPromptStrategy(t *testing.T) {
 	}
 }
 
+func TestAdapter_SupportsSubAgents(t *testing.T) {
+	adapter := NewAdapter()
+	if !adapter.SupportsSubAgents() {
+		t.Error("SupportsSubAgents() should return true")
+	}
+}
+
+func TestAdapter_SubAgentsDir(t *testing.T) {
+	adapter := NewAdapter()
+	homeDir := "/home/user"
+	expected := filepath.Join(homeDir, ".kiro", "agents")
+	if got := adapter.SubAgentsDir(homeDir); got != expected {
+		t.Errorf("SubAgentsDir() = %q, want %q", got, expected)
+	}
+}
+
+func TestAdapter_EmbeddedSubAgentsDir(t *testing.T) {
+	adapter := NewAdapter()
+	if got := adapter.EmbeddedSubAgentsDir(); got != "kiro/agents" {
+		t.Errorf("EmbeddedSubAgentsDir() = %q, want %q", got, "kiro/agents")
+	}
+}
+
+func TestAdapter_KiroModelID(t *testing.T) {
+	adapter := NewAdapter()
+	tests := []struct {
+		alias model.ClaudeModelAlias
+		want  string
+	}{
+		{model.ClaudeModelOpus, "claude-opus-4-6"},
+		{model.ClaudeModelSonnet, "claude-sonnet-4-6"},
+		{model.ClaudeModelHaiku, "claude-haiku-4-5"},
+		{"unknown", "claude-sonnet-4-6"},
+	}
+	for _, tt := range tests {
+		if got := adapter.KiroModelID(tt.alias); got != tt.want {
+			t.Errorf("KiroModelID(%q) = %v, want %v", tt.alias, got, tt.want)
+		}
+	}
+}
+
 func TestAdapter_MCPStrategy(t *testing.T) {
 	adapter := NewAdapter()
 	expected := model.StrategyMCPConfigFile
