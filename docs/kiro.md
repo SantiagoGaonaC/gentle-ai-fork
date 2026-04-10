@@ -8,13 +8,14 @@ This document explains how gentle-ai integrates with **Kiro IDE** and what is in
 
 ## Overview
 
-gentle-ai supports Kiro as a **solo-agent** platform (`kiro-ide`).
+gentle-ai supports Kiro as a **native-subagent** platform (`kiro-ide`).
 
 When configured, gentle-ai installs:
 
 | Artifact | Path |
 |----------|------|
 | Steering file | `~/.kiro/steering/gentle-ai.md` |
+| Native SDD agents | `~/.kiro/agents/sdd-{phase}.md` *(10 files)* |
 | Skills directory | `<GlobalConfigDir>/skills/` |
 | MCP config | `~/.kiro/settings/mcp.json` *(separate root — see note below)* |
 
@@ -37,17 +38,17 @@ If `kiro` is not on `PATH`, Kiro will **not** be auto-detected during install. M
 
 ## SDD Execution Model
 
-Kiro runs as a **solo-agent** platform — there is no custom sub-agent delegation.
+Kiro runs with **native sub-agent delegation** via `~/.kiro/agents/`.
 
-All SDD phases run **inline in the same conversation**:
+The orchestrator stays in the steering file and coordinates phase execution, while each phase runs in its dedicated Kiro agent file:
 
 ```
-propose → spec → design → tasks → apply → verify → archive
+sdd-init → sdd-explore → sdd-propose → sdd-spec → sdd-design → sdd-tasks → sdd-apply → sdd-verify → sdd-archive (+ sdd-onboard)
 ```
 
-The orchestrator IS the executor. Cross-phase persistence is handled by Engram, which lets each phase retrieve prior artifacts from memory rather than relying on conversation history alone.
+This follows the same SDD architecture used in gentle-ai: orchestrator coordinates, phase agents execute, Engram persists artifacts across phases.
 
-**Approval gates** are required before the `apply` and `archive` phases — the orchestrator will pause and ask for confirmation before proceeding.
+**Approval gates** remain required before `apply` and `archive`.
 
 ---
 
@@ -85,6 +86,18 @@ inclusion: always
 ```
 
 `inclusion: always` ensures Kiro loads this context in every conversation automatically, regardless of workspace or file type.
+
+## Native Agent Frontmatter
+
+Kiro SDD phase agents are generated with YAML frontmatter including:
+
+- `name`
+- `description`
+- `tools`
+- `model`
+- `includeMcpJson: true`
+
+The `model` value is injected during sync from Claude alias assignments (`opus|sonnet|haiku`) to Kiro-native model IDs.
 
 ---
 
@@ -142,5 +155,5 @@ If MCP tools are not loading, check the **separate `.kiro/settings/` root** rath
 | MCP | ✅ Yes |
 | Output styles | ❌ No |
 | Slash commands | ❌ No |
-| Delegation model | Solo-agent |
+| Delegation model | Full (native subagents) |
 | Auto-install | ❌ No — manual install required |

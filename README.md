@@ -37,7 +37,7 @@ This is NOT an AI agent installer. Most agents are easy to install. This is an *
 | **Codex** | Solo-agent | CLI-native, TOML config |
 | **Windsurf** | Solo-agent | Plan Mode, Code Mode, native workflows |
 | **Antigravity** | Solo-agent + Mission Control | Built-in Browser/Terminal sub-agents |
-| **Kiro IDE** | Solo-agent | Native `.kiro/specs/` workflow, separate MCP path |
+| **Kiro IDE** | Full (native subagents) | Native `~/.kiro/agents/` + steering orchestration |
 
 > **Note**: This project supersedes [Agent Teams Lite](https://github.com/Gentleman-Programming/agent-teams-lite) (now archived). Everything ATL provided is included here with better installation, automatic updates, and persistent memory.
 
@@ -169,7 +169,7 @@ engram tui                    # Visual memory browser
 | [Components, Skills & Presets](docs/components.md) | All components, GGA behavior, skill catalog, and preset definitions |
 | [Usage](docs/usage.md) | Persona modes, interactive TUI, CLI flags, and dependency management |
 | [Backup & Rollback](docs/rollback.md) | Backup retention, compression, dedup, pinning, and restore |
-| [Kiro IDE](docs/kiro.md) | Kiro-specific setup, config paths, native specs workflow, and SDD behavior |
+| [Kiro IDE](docs/kiro.md) | Kiro-specific setup, config paths, native subagents, and SDD behavior |
 | [Platforms](docs/platforms.md) | Supported platforms, Windows notes, security verification, config paths |
 | [Architecture & Development](docs/architecture.md) | Codebase layout, testing, and relationship to Gentleman.Dots |
 

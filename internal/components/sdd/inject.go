@@ -540,7 +540,7 @@ func Inject(homeDir string, adapter agents.Adapter, sddMode model.SDDModeID, opt
 		for _, phase := range []string{"sdd-apply", "sdd-verify"} {
 			checkPath := filepath.Join(agentsDir, phase+".md")
 			if info, err := os.Stat(checkPath); err != nil || info.Size() < 50 {
-				return InjectionResult{}, fmt.Errorf("post-check: cursor agent %q not written correctly", phase)
+				return InjectionResult{}, fmt.Errorf("post-check: sub-agent %q not written correctly", phase)
 			}
 		}
 	}
