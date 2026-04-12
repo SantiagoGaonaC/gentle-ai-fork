@@ -16,22 +16,21 @@ func TestModelConfigOptions_Count(t *testing.T) {
 	}
 }
 
-// TestModelConfigOptions_ContainsRequiredItems verifies the four options are
-// Claude, OpenCode, Kiro, and Back (in order).
-func TestModelConfigOptions_ContainsRequiredItems(t *testing.T) {
+// TestModelConfigOptions_Order verifies the exact order of options:
+// Claude → OpenCode → Kiro → Back.
+func TestModelConfigOptions_Order(t *testing.T) {
 	opts := ModelConfigOptions()
 
-	want := []string{"Claude", "Kiro", "OpenCode", "Back"}
-	for _, w := range want {
-		found := false
-		for _, opt := range opts {
-			if strings.Contains(opt, w) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("ModelConfigOptions() missing expected option containing %q; got %v", w, opts)
+	// wantKeywords defines the expected order by a unique keyword per option.
+	wantKeywords := []string{"Claude", "OpenCode", "Kiro", "Back"}
+
+	if len(opts) != len(wantKeywords) {
+		t.Fatalf("ModelConfigOptions() len = %d, want %d; got %v", len(opts), len(wantKeywords), opts)
+	}
+
+	for i, keyword := range wantKeywords {
+		if !strings.Contains(opts[i], keyword) {
+			t.Errorf("ModelConfigOptions()[%d] = %q, want option containing %q", i, opts[i], keyword)
 		}
 	}
 }
