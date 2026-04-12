@@ -368,16 +368,20 @@ func TestGoldenSDD_Kiro(t *testing.T) {
 	skillInit := readTestFile(t, filepath.Join(skillsDir, "sdd-init", "SKILL.md"))
 	assertGolden(t, "sdd-kiro-skill-sdd-init.golden", skillInit)
 
-	// Verify ALL expected SDD skill files exist.
+	// Verify all SDD skill files written by the SDD injector exist.
 	expectedSkills := []string{
 		"sdd-init", "sdd-apply", "sdd-archive", "sdd-explore",
 		"sdd-propose", "sdd-spec", "sdd-design", "sdd-tasks", "sdd-verify",
+		"sdd-onboard", "judgment-day",
 	}
 	for _, name := range expectedSkills {
 		path := filepath.Join(skillsDir, name, "SKILL.md")
 		if _, err := os.Stat(path); err != nil {
 			t.Errorf("expected SDD skill file %q not found: %v", name, err)
 		}
+	}
+	if _, err := os.Stat(filepath.Join(skillsDir, "_shared", "SKILL.md")); err != nil {
+		t.Errorf("expected SDD shared marker %q not found: %v", filepath.Join("_shared", "SKILL.md"), err)
 	}
 
 	// Verify all 10 Kiro native SDD phase agent files with golden snapshots.

@@ -1230,10 +1230,10 @@ func (m Model) confirmSelection() (tea.Model, tea.Cmd) {
 				m.setScreen(ScreenModelConfig)
 				return m, nil
 			}
-			if m.Selection.Preset == model.PresetCustom {
-				m.setScreen(ScreenDependencyTree)
-			} else if m.shouldShowClaudeModelPickerScreen() {
+			if m.shouldShowClaudeModelPickerScreen() {
 				m.setScreen(ScreenClaudeModelPicker)
+			} else if m.Selection.Preset == model.PresetCustom {
+				m.setScreen(ScreenDependencyTree)
 			} else {
 				m.setScreen(ScreenPreset)
 			}

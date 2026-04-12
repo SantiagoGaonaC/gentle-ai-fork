@@ -15,10 +15,14 @@ type ConfigState struct {
 	IsDirectory bool
 }
 
-// knownAgentConfigDirs enumerates every agent's GlobalConfigDir as a
-// (agentID, path) pair for the given homeDir. This is a compatibility shim
+// knownAgentConfigDirs enumerates the per-agent config roots used by ScanConfigs
+// for presence scanning as (agentID, path) pairs. This is a compatibility shim
 // that mirrors the adapter registry's full set without importing the agents
 // package (which would create an import cycle: system ← agents ← system).
+//
+// Most entries mirror Adapter.GlobalConfigDir(). Kiro is an intentional
+// exception: we scan `~/.kiro` (managed artifacts root) instead of
+// `%APPDATA%/kiro/User` (settings root) due to Kiro's split-root layout.
 //
 // When a new agent is added to the registry, its entry must also be added here
 // until the import cycle is resolved and ScanConfigs can delegate directly to
