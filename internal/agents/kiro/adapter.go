@@ -13,11 +13,13 @@ import (
 
 type Adapter struct {
 	lookPath func(string) (string, error)
+	statPath func(string) (os.FileInfo, error)
 }
 
 func NewAdapter() *Adapter {
 	return &Adapter{
 		lookPath: exec.LookPath,
+		statPath: os.Stat,
 	}
 }
 
@@ -33,16 +35,30 @@ func (a *Adapter) Tier() model.SupportTier {
 
 // --- Detection ---
 
-func (a *Adapter) Detect(_ context.Context, _ string) (bool, string, string, bool, error) {
+func (a *Adapter) Detect(_ context.Context, homeDir string) (bool, string, string, bool, error) {
 	// Kiro IDE is a VS Code fork available as a desktop application.
 	// Official website: https://kiro.dev/
-	// Detect by the "kiro" binary on PATH.
+	// Detection uses two signals:
+	//   1. "kiro" binary on PATH — primary indicator that Kiro is installed.
+	//   2. ~/.kiro config dir — returned as configPath so callers/UI can
+	//      show the managed directory and configFound reflects filesystem reality.
+	//
+	// Note: configPath is ~/.kiro (the home-based root where all managed
+	// artifacts live), NOT GlobalConfigDir() which points to the OS app-config
+	// dir (%APPDATA%\kiro\User on Windows) used only for settings.json.
+	configPath := filepath.Join(homeDir, ".kiro")
+
 	binaryPath, err := a.lookPath("kiro")
 	if err != nil {
-		return false, "", "", false, nil
+		// Binary not found — Kiro is not installed.
+		return false, "", configPath, false, nil
 	}
 
-	return true, binaryPath, "", true, nil
+	// Binary found — check whether the config dir already exists.
+	info, statErr := a.statPath(configPath)
+	configFound := statErr == nil && info.IsDir()
+
+	return true, binaryPath, configPath, configFound, nil
 }
 
 // --- Installation ---

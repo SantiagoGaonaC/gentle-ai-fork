@@ -1,6 +1,7 @@
 package kiro
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -24,37 +25,85 @@ func TestAdapter_Tier(t *testing.T) {
 }
 
 func TestAdapter_Detect_BinaryNotFound(t *testing.T) {
+	home := t.TempDir()
 	adapter := &Adapter{
 		lookPath: func(string) (string, error) {
 			return "", &mockLookPathError{}
 		},
+		statPath: os.Stat,
 	}
 
-	installed, _, _, _, err := adapter.Detect(nil, "")
+	installed, _, configPath, configFound, err := adapter.Detect(nil, home)
 	if installed {
-		t.Error("Detect() should return false when binary not found")
+		t.Error("Detect() installed should be false when binary not found")
+	}
+	if configFound {
+		t.Error("Detect() configFound should be false when binary not found")
+	}
+	wantConfigPath := filepath.Join(home, ".kiro")
+	if configPath != wantConfigPath {
+		t.Errorf("Detect() configPath = %q, want %q", configPath, wantConfigPath)
 	}
 	if err != nil {
 		t.Errorf("Detect() should not return error when binary not found, got %v", err)
 	}
 }
 
-func TestAdapter_Detect_BinaryFound(t *testing.T) {
+func TestAdapter_Detect_BinaryFoundConfigDirMissing(t *testing.T) {
+	home := t.TempDir()
 	adapter := &Adapter{
 		lookPath: func(string) (string, error) {
 			return "/usr/local/bin/kiro", nil
 		},
+		statPath: os.Stat,
 	}
 
-	installed, binaryPath, _, configFound, err := adapter.Detect(nil, "")
+	// ~/.kiro does not exist — binary found but config dir absent.
+	installed, binaryPath, configPath, configFound, err := adapter.Detect(nil, home)
 	if !installed {
-		t.Error("Detect() should return true when binary found")
+		t.Error("Detect() installed should be true when binary found")
 	}
 	if binaryPath != "/usr/local/bin/kiro" {
 		t.Errorf("Detect() binaryPath = %q, want %q", binaryPath, "/usr/local/bin/kiro")
 	}
+	wantConfigPath := filepath.Join(home, ".kiro")
+	if configPath != wantConfigPath {
+		t.Errorf("Detect() configPath = %q, want %q", configPath, wantConfigPath)
+	}
+	if configFound {
+		t.Error("Detect() configFound should be false when ~/.kiro does not exist")
+	}
+	if err != nil {
+		t.Errorf("Detect() should not return error, got %v", err)
+	}
+}
+
+func TestAdapter_Detect_BinaryFoundConfigDirExists(t *testing.T) {
+	home := t.TempDir()
+	// Create ~/.kiro to simulate a post-first-run Kiro state.
+	if err := os.MkdirAll(filepath.Join(home, ".kiro"), 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	adapter := &Adapter{
+		lookPath: func(string) (string, error) {
+			return "/usr/local/bin/kiro", nil
+		},
+		statPath: os.Stat,
+	}
+
+	installed, binaryPath, configPath, configFound, err := adapter.Detect(nil, home)
+	if !installed {
+		t.Error("Detect() installed should be true when binary found")
+	}
+	if binaryPath != "/usr/local/bin/kiro" {
+		t.Errorf("Detect() binaryPath = %q, want %q", binaryPath, "/usr/local/bin/kiro")
+	}
+	wantConfigPath := filepath.Join(home, ".kiro")
+	if configPath != wantConfigPath {
+		t.Errorf("Detect() configPath = %q, want %q", configPath, wantConfigPath)
+	}
 	if !configFound {
-		t.Error("Detect() configFound should be true")
+		t.Error("Detect() configFound should be true when ~/.kiro exists")
 	}
 	if err != nil {
 		t.Errorf("Detect() should not return error, got %v", err)
