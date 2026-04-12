@@ -8,7 +8,7 @@ import (
 // ─── ModelConfigOptions ────────────────────────────────────────────────────
 
 // TestModelConfigOptions_Count verifies that ModelConfigOptions returns exactly
-// 4 items: Claude, Kiro, OpenCode, and Back.
+// 4 items: Claude, OpenCode, Kiro, and Back.
 func TestModelConfigOptions_Count(t *testing.T) {
 	opts := ModelConfigOptions()
 	if len(opts) != 4 {
@@ -16,8 +16,8 @@ func TestModelConfigOptions_Count(t *testing.T) {
 	}
 }
 
-// TestModelConfigOptions_ContainsRequiredItems verifies the three options are
-// Claude, Kiro, OpenCode, and Back (in order).
+// TestModelConfigOptions_ContainsRequiredItems verifies the four options are
+// Claude, OpenCode, Kiro, and Back (in order).
 func TestModelConfigOptions_ContainsRequiredItems(t *testing.T) {
 	opts := ModelConfigOptions()
 
