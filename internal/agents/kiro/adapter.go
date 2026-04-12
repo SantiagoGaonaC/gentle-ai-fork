@@ -72,11 +72,12 @@ func (a *Adapter) InstallCommand(_ system.PlatformProfile) ([][]string, error) {
 }
 
 // --- Config paths ---
-// Kiro IDE (VS Code fork) uses similar directory structure to VS Code:
-//   - macOS: ~/Library/Application Support/Kiro/User/
-//   - Linux: ~/.config/kiro/user/ (respects XDG_CONFIG_HOME)
-//   - Windows: %APPDATA%/kiro/User/
-// System prompts are loaded from .instructions.md files in the prompts folder
+// Kiro IDE (VS Code fork) uses a split-root layout:
+//   - Steering/skills/agents/MCP: ~/.kiro/ (home-based, all platforms)
+//   - Settings:  macOS: ~/Library/Application Support/Kiro/User/
+//               Linux: ~/.config/kiro/user/ (respects XDG_CONFIG_HOME)
+//               Windows: %APPDATA%/kiro/User/
+// Steering content is written to ~/.kiro/steering/gentle-ai.md via StrategySteeringFile.
 
 func (a *Adapter) GlobalConfigDir(homeDir string) string {
 	return a.kiroConfigDir(homeDir)
