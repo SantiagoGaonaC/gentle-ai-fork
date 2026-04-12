@@ -12,7 +12,7 @@ func TestRenderKiroModelPicker_ShowsRequestedCopy(t *testing.T) {
 	if !strings.Contains(out, "Kiro Model Assignments") {
 		t.Fatalf("expected title 'Kiro Model Assignments' in output, got:\n%s", out)
 	}
-	if !strings.Contains(out, "Choose how Kiro models are assigned to each SDD phase:") {
+	if !strings.Contains(out, "Choose how Kiro models are assigned to each SDD execution phase") {
 		t.Fatalf("expected Kiro subtitle in output, got:\n%s", out)
 	}
 }

@@ -3074,6 +3074,52 @@ func TestInjectKiroBalancedPresetAssignmentsEndToEnd(t *testing.T) {
 	}
 }
 
+// TestInjectKiroModelAssignmentsTakePrecedenceOverClaude verifies that when
+// both KiroModelAssignments and ClaudeModelAssignments are provided,
+// KiroModelAssignments wins for Kiro subagent file generation.
+func TestInjectKiroModelAssignmentsTakePrecedenceOverClaude(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
+
+	adapter, err := agents.NewAdapter(model.AgentKiroIDE)
+	if err != nil {
+		t.Fatalf("NewAdapter(kiro-ide) error = %v", err)
+	}
+
+	// Conflicting values: Kiro says opus for sdd-design, Claude says haiku.
+	// Kiro-specific assignments MUST take precedence.
+	opts := InjectOptions{
+		KiroModelAssignments: map[string]model.ClaudeModelAlias{
+			"sdd-design": model.ClaudeModelOpus,
+		},
+		ClaudeModelAssignments: map[string]model.ClaudeModelAlias{
+			"sdd-design": model.ClaudeModelHaiku,
+		},
+	}
+
+	_, err = Inject(home, adapter, "", opts)
+	if err != nil {
+		t.Fatalf("Inject error = %v", err)
+	}
+
+	path := filepath.Join(home, ".kiro", "agents", "sdd-design.md")
+	content, readErr := os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("ReadFile(sdd-design) error = %v", readErr)
+	}
+
+	wantKiro := "model: " + model.KiroModelID(model.ClaudeModelOpus)
+	wantClaude := "model: " + model.KiroModelID(model.ClaudeModelHaiku)
+
+	if !strings.Contains(string(content), wantKiro) {
+		t.Fatalf("expected KiroModelAssignments to take precedence: want %q not found in file", wantKiro)
+	}
+	if strings.Contains(string(content), wantClaude) {
+		t.Fatalf("ClaudeModelAssignments must NOT be used when KiroModelAssignments is set: found %q", wantClaude)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Fix 2: findProjectRoot — monorepo and enhanced workspace root detection
 // ---------------------------------------------------------------------------

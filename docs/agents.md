@@ -125,7 +125,7 @@ Kiro uses native custom agents in `~/.kiro/agents/`. `gentle-ai` writes 10 phase
 - **Detection**: gentle-ai detects Kiro by resolving `kiro` from `PATH` — the binary must be available
 - **Steering file** (all platforms): `~/.kiro/steering/gentle-ai.md` with frontmatter `inclusion: always`
 - Native subagents at `~/.kiro/agents/sdd-{phase}.md` (10 files)
-- Skills at the platform-specific Kiro User dir under `skills/`
+- Skills (all platforms) at `~/.kiro/skills/`
 - **MCP config at a separate root** — always `~/.kiro/settings/mcp.json` (macOS/Linux) or `%USERPROFILE%\.kiro\settings\mcp.json` (Windows), regardless of GlobalConfigDir
 - Native Kiro specs workflow: `.kiro/specs/<feature>/requirements.md`, `design.md`, `tasks.md` — with approval gates before apply and archive phases
 - Manual install only — download from [kiro.dev/downloads](https://kiro.dev/downloads)

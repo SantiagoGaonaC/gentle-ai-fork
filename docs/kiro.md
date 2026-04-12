@@ -16,7 +16,7 @@ When configured, gentle-ai installs:
 |----------|------|
 | Steering file | `~/.kiro/steering/gentle-ai.md` |
 | Native SDD agents | `~/.kiro/agents/sdd-{phase}.md` *(10 files)* |
-| Skills directory | `<GlobalConfigDir>/skills/` |
+| Skills directory | `~/.kiro/skills/` |
 | MCP config | `~/.kiro/settings/mcp.json` *(separate root — see note below)* |
 
 > **Auto-install not supported.** Kiro must be installed manually before running gentle-ai.
