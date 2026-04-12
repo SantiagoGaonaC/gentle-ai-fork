@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/gentleman-programming/gentle-ai/internal/model"
@@ -326,22 +327,12 @@ type mockLookPathError struct{}
 func (e *mockLookPathError) Error() string { return "executable not found" }
 func (e *mockLookPathError) Unwrap() error { return nil }
 
-// contains checks if a path contains all given components as substrings
+// contains checks if a path contains all given components as substrings.
 func contains(path string, components ...string) bool {
 	for _, comp := range components {
-		if !stringContains(path, comp) {
+		if !strings.Contains(path, comp) {
 			return false
 		}
 	}
 	return true
-}
-
-// stringContains is a simple substring check
-func stringContains(s, substr string) bool {
-	for i := 0; i < len(s)-len(substr)+1; i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
