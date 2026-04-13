@@ -1,7 +1,9 @@
 package kiro
 
 import (
+	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -321,11 +323,36 @@ func TestAdapter_SupportsFeatures(t *testing.T) {
 	}
 }
 
-// mockLookPathError is a mock error for testing
+// TestAdapter_Detect_UnexpectedLookPathError verifies that unexpected lookPath
+// errors (not ErrNotFound) are surfaced as non-nil errors rather than silently
+// swallowed as "not installed".
+func TestAdapter_Detect_UnexpectedLookPathError(t *testing.T) {
+	home := t.TempDir()
+	unexpectedErr := errors.New("permission denied")
+	adapter := &Adapter{
+		lookPath: func(string) (string, error) {
+			return "", unexpectedErr
+		},
+		statPath: os.Stat,
+	}
+
+	installed, _, _, _, err := adapter.Detect(nil, home)
+	if installed {
+		t.Error("Detect() installed should be false on unexpected error")
+	}
+	if err == nil {
+		t.Fatal("Detect() should return non-nil error for unexpected lookPath failure")
+	}
+	if !errors.Is(err, unexpectedErr) {
+		t.Errorf("Detect() error = %v, want %v", err, unexpectedErr)
+	}
+}
+
+// mockLookPathError wraps exec.ErrNotFound so errors.Is works correctly.
 type mockLookPathError struct{}
 
-func (e *mockLookPathError) Error() string { return "executable not found" }
-func (e *mockLookPathError) Unwrap() error { return nil }
+func (e *mockLookPathError) Error() string { return exec.ErrNotFound.Error() }
+func (e *mockLookPathError) Unwrap() error { return exec.ErrNotFound }
 
 // contains checks if a path contains all given components as substrings.
 func contains(path string, components ...string) bool {

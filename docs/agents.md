@@ -124,7 +124,7 @@ Kiro uses native custom agents in `~/.kiro/agents/`. `gentle-ai` writes 10 phase
 - Settings managed via the IDE's Agent settings UI, not via `settings.json`
 
 ### Kiro IDE
-- **Detection**: gentle-ai detects Kiro by resolving `kiro` from `PATH` — the binary must be available
+- **Detection**: gentle-ai detects Kiro from its config root (`~/.kiro`) during install/TUI discovery — `~/.kiro` must exist (created on first Kiro launch). `kiro` on `PATH` is also checked for sync/upgrade flows but is not required for install auto-detection
 - **Steering file** (all platforms): `~/.kiro/steering/gentle-ai.md` with frontmatter `inclusion: always`
 - Native subagents at `~/.kiro/agents/sdd-{phase}.md` (10 files)
 - Skills (all platforms) at `~/.kiro/skills/`

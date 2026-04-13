@@ -2,6 +2,7 @@ package kiro
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,8 +51,12 @@ func (a *Adapter) Detect(_ context.Context, homeDir string) (bool, string, strin
 
 	binaryPath, err := a.lookPath("kiro")
 	if err != nil {
-		// Binary not found — Kiro is not installed.
-		return false, "", configPath, false, nil
+		if errors.Is(err, exec.ErrNotFound) {
+			// Binary not found — Kiro is not installed.
+			return false, "", configPath, false, nil
+		}
+		// Unexpected error (permission / IO) — surface it so callers can distinguish.
+		return false, "", configPath, false, err
 	}
 
 	// Binary found — check whether the config dir already exists.

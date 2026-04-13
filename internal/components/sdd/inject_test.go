@@ -2979,7 +2979,10 @@ func TestInjectCursorWritesSubAgentFiles(t *testing.T) {
 	}
 }
 
-func TestInjectKiroAppliesCustomPhaseModelAssignments(t *testing.T) {
+// TestInjectKiroFallsBackToClaudeModelAssignmentsWhenKiroMapUnset verifies that
+// when KiroModelAssignments is nil, the injector falls back to ClaudeModelAssignments
+// for Kiro phase model resolution (legacy backward-compatible path).
+func TestInjectKiroFallsBackToClaudeModelAssignmentsWhenKiroMapUnset(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))

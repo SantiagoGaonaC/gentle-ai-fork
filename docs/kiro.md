@@ -26,13 +26,12 @@ When configured, gentle-ai installs:
 
 ## Detection
 
-gentle-ai detects Kiro by resolving `kiro` from `PATH`:
+gentle-ai uses **two signals** to detect Kiro:
 
-```
-exec.LookPath("kiro")
-```
+1. **`~/.kiro` directory presence** — used by `system.ScanConfigs` for the install/TUI auto-detection flow. If `~/.kiro` exists on disk, Kiro is shown as detected in the installer, regardless of whether the binary is on `PATH`.
+2. **`kiro` binary on `PATH`** — used by `adapter.Detect()` for the sync/upgrade flow and to confirm the IDE is actually runnable.
 
-If `kiro` is not on `PATH`, Kiro will **not** be auto-detected during install. Make sure the Kiro binary is accessible in your shell environment before running `gentle-ai install`.
+In practice: **the installer detects Kiro from `~/.kiro`**, not from `PATH`. If you have Kiro installed but `~/.kiro` hasn't been created yet (e.g., before first launch), run Kiro once to initialize its config dir, then re-run `gentle-ai install`.
 
 ---
 
@@ -135,14 +134,23 @@ The `model` value is injected during sync from Claude alias assignments (`opus|s
 
 ---
 
-## ⚠️ MCP Path Separation
+## ⚠️ Split-Root Layout
 
-Kiro stores user config and MCP config in **different root directories**.
+Kiro uses a **split-root layout** — gentle-ai managed files and IDE settings live in different directories:
 
-- **User config** (prompts, skills, settings) lives under the platform-native Kiro User dir (`~/Library/Application Support/Kiro/User`, `%APPDATA%\kiro\User`, or `$XDG_CONFIG_HOME/kiro/user`)
-- **MCP config** is always at `~/.kiro/settings/mcp.json` (or `%USERPROFILE%\.kiro\settings\mcp.json` on Windows), regardless of platform
+- **Steering, skills, and native agents** → `~/.kiro/` (or `%USERPROFILE%\.kiro\` on Windows)
+  - `~/.kiro/steering/gentle-ai.md` — orchestrator persona
+  - `~/.kiro/skills/` — SDD skill files
+  - `~/.kiro/agents/` — SDD phase subagents
+- **IDE settings** → platform-native Kiro User dir (`settings.json` only)
+  - macOS: `~/Library/Application Support/Kiro/User/settings.json`
+  - Windows: `%APPDATA%\kiro\User\settings.json`
+  - Linux: `$XDG_CONFIG_HOME/kiro/user/settings.json`
+- **MCP config** → always `~/.kiro/settings/mcp.json` (or `%USERPROFILE%\.kiro\settings\mcp.json` on Windows)
 
-If MCP tools are not loading, check the **separate `.kiro/settings/` root** rather than the Kiro User config dir.
+If MCP tools are not loading, check `~/.kiro/settings/mcp.json`.  
+If Kiro app settings are not applying, check the platform-native User dir (`settings.json`).  
+If gentle-ai skills or steering are missing, check `~/.kiro/skills/` and `~/.kiro/steering/`.
 
 ---
 
