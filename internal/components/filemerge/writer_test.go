@@ -1,9 +1,11 @@
 package filemerge
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -116,5 +118,113 @@ func TestWriteFileAtomicRejectsSymlinkParentDirectory(t *testing.T) {
 	_, err := WriteFileAtomic(path, []byte("value\n"), 0o644)
 	if err == nil {
 		t.Fatal("WriteFileAtomic() error = nil, want symlink parent rejection")
+	}
+}
+
+func TestWriteFileAtomicIgnoresPermissionErrorFromSyncDirOnWindows(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "nested", "config.json")
+	content := []byte("{\"ok\":true}\n")
+
+	origGOOS := runtimeGOOS
+	origSyncDir := syncDirFn
+	t.Cleanup(func() {
+		runtimeGOOS = origGOOS
+		syncDirFn = origSyncDir
+	})
+
+	runtimeGOOS = func() string { return "windows" }
+	syncDirFn = func(string) error { return os.ErrPermission }
+
+	result, err := WriteFileAtomic(path, content, 0o644)
+	if err != nil {
+		t.Fatalf("WriteFileAtomic() error = %v, want nil on windows permission-denied dir sync", err)
+	}
+	if !result.Changed || !result.Created {
+		t.Fatalf("WriteFileAtomic() result = %+v, want Changed=true Created=true", result)
+	}
+	got, readErr := os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("ReadFile() error = %v", readErr)
+	}
+	if string(got) != string(content) {
+		t.Fatalf("file content = %q, want %q", string(got), string(content))
+	}
+}
+
+func TestWriteFileAtomicPropagatesSyncDirErrorOnUnix(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "nested", "config.json")
+	content := []byte("{\"ok\":true}\n")
+
+	origGOOS := runtimeGOOS
+	origSyncDir := syncDirFn
+	t.Cleanup(func() {
+		runtimeGOOS = origGOOS
+		syncDirFn = origSyncDir
+	})
+
+	runtimeGOOS = func() string { return "linux" }
+	syncDirFn = func(string) error { return os.ErrPermission }
+
+	_, err := WriteFileAtomic(path, content, 0o644)
+	if err == nil {
+		t.Fatal("WriteFileAtomic() error = nil, want sync parent directory failure on unix")
+	}
+	if !strings.Contains(err.Error(), "sync parent directory") {
+		t.Fatalf("WriteFileAtomic() error = %v, want sync parent directory context", err)
+	}
+}
+
+func TestWriteFileAtomicPropagatesUnexpectedSyncDirErrorOnWindows(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "nested", "config.json")
+	content := []byte("{\"ok\":true}\n")
+	boom := errors.New("boom")
+
+	origGOOS := runtimeGOOS
+	origSyncDir := syncDirFn
+	t.Cleanup(func() {
+		runtimeGOOS = origGOOS
+		syncDirFn = origSyncDir
+	})
+
+	runtimeGOOS = func() string { return "windows" }
+	syncDirFn = func(string) error { return boom }
+
+	_, err := WriteFileAtomic(path, content, 0o644)
+	if err == nil {
+		t.Fatal("WriteFileAtomic() error = nil, want unexpected sync parent directory error on windows")
+	}
+	if !errors.Is(err, boom) {
+		t.Fatalf("WriteFileAtomic() error = %v, want wrapped boom", err)
+	}
+}
+
+func TestWriteFileAtomicPropagatesSyncTempFileError(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "nested", "config.json")
+	content := []byte("{\"ok\":true}\n")
+	boom := errors.New("temp sync failed")
+
+	origSyncFile := syncFileFn
+	t.Cleanup(func() {
+		syncFileFn = origSyncFile
+	})
+
+	syncFileFn = func(*os.File) error { return boom }
+
+	_, err := WriteFileAtomic(path, content, 0o644)
+	if err == nil {
+		t.Fatal("WriteFileAtomic() error = nil, want sync temp file failure")
+	}
+	if !strings.Contains(err.Error(), "sync temp file") {
+		t.Fatalf("WriteFileAtomic() error = %v, want sync temp file context", err)
+	}
+	if !errors.Is(err, boom) {
+		t.Fatalf("WriteFileAtomic() error = %v, want wrapped boom", err)
+	}
+	if _, statErr := os.Stat(path); !os.IsNotExist(statErr) {
+		t.Fatalf("target file should not exist after pre-rename sync failure, stat err=%v", statErr)
 	}
 }

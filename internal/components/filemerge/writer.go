@@ -2,14 +2,22 @@ package filemerge
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 const maxAtomicFileSize = 16 << 20
+
+var (
+	runtimeGOOS = func() string { return runtime.GOOS }
+	syncDirFn   = syncDir
+	syncFileFn  = syncFile
+)
 
 type WriteResult struct {
 	Changed bool
@@ -61,7 +69,7 @@ func WriteFileAtomic(path string, content []byte, perm fs.FileMode) (WriteResult
 		return WriteResult{}, fmt.Errorf("set permissions on temp file for %q: %w", path, err)
 	}
 
-	if err := tmp.Sync(); err != nil {
+	if err := syncFileFn(tmp); err != nil {
 		_ = tmp.Close()
 		return WriteResult{}, fmt.Errorf("sync temp file for %q: %w", path, err)
 	}
@@ -74,17 +82,30 @@ func WriteFileAtomic(path string, content []byte, perm fs.FileMode) (WriteResult
 		return WriteResult{}, fmt.Errorf("replace %q atomically: %w", path, err)
 	}
 
-	dirFD, err := os.Open(dir)
-	if err != nil {
-		return WriteResult{}, fmt.Errorf("open parent directory for %q: %w", path, err)
-	}
-	defer dirFD.Close()
-	if err := dirFD.Sync(); err != nil {
-		return WriteResult{}, fmt.Errorf("sync parent directory for %q: %w", path, err)
+	if err := syncDirFn(dir); err != nil {
+		if !(runtimeGOOS() == "windows" && errors.Is(err, os.ErrPermission)) {
+			return WriteResult{}, fmt.Errorf("sync parent directory for %q: %w", path, err)
+		}
 	}
 
 	cleanup = false
 	return WriteResult{Changed: true, Created: created}, nil
+}
+
+func syncDir(dir string) error {
+	dirFD, err := os.Open(dir)
+	if err != nil {
+		return fmt.Errorf("open parent directory %q: %w", dir, err)
+	}
+	defer dirFD.Close()
+	if err := dirFD.Sync(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func syncFile(f *os.File) error {
+	return f.Sync()
 }
 
 func readComparableFile(path string) ([]byte, error) {
