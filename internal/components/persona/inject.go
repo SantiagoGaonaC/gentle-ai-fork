@@ -325,6 +325,10 @@ func personaContent(agent model.AgentID, persona model.PersonaID) string {
 			return assets.MustRead("claude/persona-gentleman.md")
 		case model.AgentOpenCode, model.AgentKilocode:
 			return assets.MustRead("opencode/persona-gentleman.md")
+		case model.AgentKiroIDE:
+			// Kiro uses a steering-file based persona. The asset is identical to
+			// generic today but kept separate so it can diverge independently.
+			return assets.MustRead("kiro/persona-gentleman.md")
 		default:
 			// Generic persona includes Gentleman personality + skills table + SDD orchestrator.
 			// Used by Gemini CLI, Cursor, VS Code Copilot, and any future agents.

@@ -385,8 +385,16 @@ func TestGoldenSDD_Kiro(t *testing.T) {
 	}
 
 	// Verify all 10 Kiro native SDD phase agent files with golden snapshots.
-	// SubAgentsDir is not part of the agents.Adapter interface — use the concrete adapter.
-	agentsDir := filepath.Join(home, ".kiro", "agents")
+	// Type-assert to the concrete Kiro adapter so SubAgentsDir(home) drives
+	// the path — the test stays correct if the adapter path ever changes.
+	type subAgentDirProvider interface {
+		SubAgentsDir(homeDir string) string
+	}
+	kiro, ok := adapter.(subAgentDirProvider)
+	if !ok {
+		t.Fatal("adapter does not implement SubAgentsDir — Kiro subagent test cannot run")
+	}
+	agentsDir := kiro.SubAgentsDir(home)
 	for _, name := range []string{
 		"sdd-init", "sdd-explore", "sdd-propose", "sdd-spec",
 		"sdd-design", "sdd-tasks", "sdd-apply", "sdd-verify",
