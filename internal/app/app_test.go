@@ -362,12 +362,16 @@ func TestApplyOverrides_KiroModelAssignments(t *testing.T) {
 func TestLoadPersistedAssignmentsPopulatesEmptySelection(t *testing.T) {
 	home := t.TempDir()
 
-	// Seed state with assignments.
+	// Seed state with assignments including Kiro.
 	err := state.Write(home, state.InstallState{
 		InstalledAgents: []string{"opencode"},
 		ClaudeModelAssignments: map[string]string{
 			"orchestrator": "opus",
 			"sdd-apply":    "sonnet",
+		},
+		KiroModelAssignments: map[string]string{
+			"sdd-design":  "opus",
+			"sdd-archive": "haiku",
 		},
 		ModelAssignments: map[string]state.ModelAssignmentState{
 			"sdd-init": {ProviderID: "anthropic", ModelID: "claude-sonnet-4"},
@@ -385,6 +389,12 @@ func TestLoadPersistedAssignmentsPopulatesEmptySelection(t *testing.T) {
 	}
 	if got := selection.ClaudeModelAssignments["sdd-apply"]; got != "sonnet" {
 		t.Errorf("ClaudeModelAssignments[sdd-apply] = %q, want %q", got, "sonnet")
+	}
+	if got := selection.KiroModelAssignments["sdd-design"]; got != model.ClaudeModelOpus {
+		t.Errorf("KiroModelAssignments[sdd-design] = %q, want %q", got, model.ClaudeModelOpus)
+	}
+	if got := selection.KiroModelAssignments["sdd-archive"]; got != model.ClaudeModelHaiku {
+		t.Errorf("KiroModelAssignments[sdd-archive] = %q, want %q", got, model.ClaudeModelHaiku)
 	}
 	ma := selection.ModelAssignments["sdd-init"]
 	if ma.ProviderID != "anthropic" || ma.ModelID != "claude-sonnet-4" {
@@ -460,6 +470,34 @@ func TestPersistAssignmentsPreservesInstalledAgents(t *testing.T) {
 	}
 	if got.ClaudeModelAssignments["orchestrator"] != "opus" {
 		t.Errorf("ClaudeModelAssignments[orchestrator] = %q, want %q", got.ClaudeModelAssignments["orchestrator"], "opus")
+	}
+}
+
+// TestPersistAndLoadKiroModelAssignments verifies that KiroModelAssignments
+// survive a persist/load round-trip via state.json.
+func TestPersistAndLoadKiroModelAssignments(t *testing.T) {
+	home := t.TempDir()
+
+	selection := model.Selection{
+		KiroModelAssignments: map[string]model.ClaudeModelAlias{
+			"sdd-design":  model.ClaudeModelOpus,
+			"sdd-archive": model.ClaudeModelHaiku,
+			"default":     model.ClaudeModelSonnet,
+		},
+	}
+	persistAssignments(home, selection)
+
+	loaded := model.Selection{}
+	loadPersistedAssignments(home, &loaded)
+
+	if got := loaded.KiroModelAssignments["sdd-design"]; got != model.ClaudeModelOpus {
+		t.Errorf("round-trip KiroModelAssignments[sdd-design] = %q, want %q", got, model.ClaudeModelOpus)
+	}
+	if got := loaded.KiroModelAssignments["sdd-archive"]; got != model.ClaudeModelHaiku {
+		t.Errorf("round-trip KiroModelAssignments[sdd-archive] = %q, want %q", got, model.ClaudeModelHaiku)
+	}
+	if got := loaded.KiroModelAssignments["default"]; got != model.ClaudeModelSonnet {
+		t.Errorf("round-trip KiroModelAssignments[default] = %q, want %q", got, model.ClaudeModelSonnet)
 	}
 }
 

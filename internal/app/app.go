@@ -350,6 +350,13 @@ func loadPersistedAssignments(homeDir string, selection *model.Selection) {
 		}
 		selection.ClaudeModelAssignments = m
 	}
+	if len(selection.KiroModelAssignments) == 0 && len(s.KiroModelAssignments) > 0 {
+		m := make(map[string]model.ClaudeModelAlias, len(s.KiroModelAssignments))
+		for k, v := range s.KiroModelAssignments {
+			m[k] = model.ClaudeModelAlias(v)
+		}
+		selection.KiroModelAssignments = m
+	}
 	if len(selection.ModelAssignments) == 0 && len(s.ModelAssignments) > 0 {
 		m := make(map[string]model.ModelAssignment, len(s.ModelAssignments))
 		for k, v := range s.ModelAssignments {
@@ -363,7 +370,7 @@ func loadPersistedAssignments(homeDir string, selection *model.Selection) {
 // state.json using a read-merge-write pattern so that other fields
 // (InstalledAgents) are not lost.
 func persistAssignments(homeDir string, selection model.Selection) {
-	if len(selection.ClaudeModelAssignments) == 0 && len(selection.ModelAssignments) == 0 {
+	if len(selection.ClaudeModelAssignments) == 0 && len(selection.KiroModelAssignments) == 0 && len(selection.ModelAssignments) == 0 {
 		return
 	}
 	current, err := state.Read(homeDir)
@@ -373,6 +380,9 @@ func persistAssignments(homeDir string, selection model.Selection) {
 	}
 	if len(selection.ClaudeModelAssignments) > 0 {
 		current.ClaudeModelAssignments = claudeAliasesToStrings(selection.ClaudeModelAssignments)
+	}
+	if len(selection.KiroModelAssignments) > 0 {
+		current.KiroModelAssignments = claudeAliasesToStrings(selection.KiroModelAssignments)
 	}
 	if len(selection.ModelAssignments) > 0 {
 		current.ModelAssignments = modelAssignmentsToState(selection.ModelAssignments)
