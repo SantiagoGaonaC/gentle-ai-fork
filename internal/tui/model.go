@@ -2004,11 +2004,22 @@ func (m Model) goBack() Model {
 		return m
 	}
 
-	if m.Screen == ScreenKiroModelPicker && m.Selection.Preset == model.PresetCustom {
-		if m.shouldShowClaudeModelPickerScreen() {
-			m.setScreen(ScreenClaudeModelPicker)
+	if m.Screen == ScreenKiroModelPicker {
+		if m.Selection.Preset == model.PresetCustom {
+			// Custom preset: Kiro → Claude (if present) → DependencyTree.
+			if m.shouldShowClaudeModelPickerScreen() {
+				m.setScreen(ScreenClaudeModelPicker)
+			} else {
+				m.setScreen(ScreenDependencyTree)
+			}
 		} else {
-			m.setScreen(ScreenDependencyTree)
+			// Non-custom preset: Kiro → Claude (if present) → Preset.
+			// This keeps Esc consistent with Enter on "← Back".
+			if m.shouldShowClaudeModelPickerScreen() {
+				m.setScreen(ScreenClaudeModelPicker)
+			} else {
+				m.setScreen(ScreenPreset)
+			}
 		}
 		return m
 	}

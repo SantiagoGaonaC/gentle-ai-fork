@@ -972,6 +972,50 @@ func TestModelConfig_KiroPickerBackReturnsToModelConfig(t *testing.T) {
 	}
 }
 
+// TestKiroPickerEscNonCustomWithClaudeGoesToClaudePicker verifies that Esc from
+// ScreenKiroModelPicker in a non-custom preset returns to ScreenClaudeModelPicker
+// when Claude is in the flow — keeping Esc consistent with Enter on "← Back".
+func TestKiroPickerEscNonCustomWithClaudeGoesToClaudePicker(t *testing.T) {
+	m := NewModel(system.DetectionResult{}, "dev")
+	m.Screen = ScreenKiroModelPicker
+	m.ModelConfigMode = false
+	m.Selection.Preset = model.PresetFullGentleman // non-custom
+	// Simulate both Kiro and Claude being selected.
+	m.Selection.Agents = []model.AgentID{model.AgentKiroIDE, model.AgentClaudeCode}
+	m.Selection.Components = componentsForPreset(model.PresetFullGentleman)
+	m.KiroModelPicker = screens.NewKiroModelPickerState()
+
+	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	state := updated.(Model)
+
+	if state.Screen != ScreenClaudeModelPicker {
+		t.Fatalf("KiroModelPicker esc (non-custom, Claude in flow): screen = %v, want %v",
+			state.Screen, ScreenClaudeModelPicker)
+	}
+}
+
+// TestKiroPickerEscNonCustomWithoutClaudeGoesToPreset verifies that Esc from
+// ScreenKiroModelPicker in a non-custom preset returns to ScreenPreset when
+// Claude is NOT in the flow.
+func TestKiroPickerEscNonCustomWithoutClaudeGoesToPreset(t *testing.T) {
+	m := NewModel(system.DetectionResult{}, "dev")
+	m.Screen = ScreenKiroModelPicker
+	m.ModelConfigMode = false
+	m.Selection.Preset = model.PresetFullGentleman
+	// Only Kiro — no Claude.
+	m.Selection.Agents = []model.AgentID{model.AgentKiroIDE}
+	m.Selection.Components = componentsForPreset(model.PresetFullGentleman)
+	m.KiroModelPicker = screens.NewKiroModelPickerState()
+
+	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	state := updated.(Model)
+
+	if state.Screen != ScreenPreset {
+		t.Fatalf("KiroModelPicker esc (non-custom, no Claude): screen = %v, want %v",
+			state.Screen, ScreenPreset)
+	}
+}
+
 // TestModelConfig_OpenCodePickerBackReturnsToModelConfig verifies that pressing
 // Esc from ScreenModelPicker when in ModelConfigMode returns to ScreenModelConfig.
 func TestModelConfig_OpenCodePickerBackReturnsToModelConfig(t *testing.T) {
